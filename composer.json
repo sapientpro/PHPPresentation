@@ -36,7 +36,9 @@
     },
     "autoload": {
         "psr-4": {
-            "PhpOffice\\PhpPresentation\\": "src/PhpPresentation/"
+            "PhpOffice\\PhpPresentation\\": "src/PhpPresentation/",
+            "PhpOffice\\Opc\\": "src/Opc/",
+            "PhpOffice\\OpenXml\\": "src/OpenXml/"
         }
     },
     "scripts": {

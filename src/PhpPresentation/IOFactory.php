@@ -25,6 +25,7 @@ use PhpOffice\PhpPresentation\Exception\InvalidFileFormatException;
 use PhpOffice\PhpPresentation\Reader\ReaderInterface;
 use PhpOffice\PhpPresentation\Writer\WriterInterface;
 use ReflectionClass;
+use Throwable;
 
 /**
  * IOFactory.
@@ -56,21 +57,38 @@ class IOFactory
 
     /**
      * Loads PhpPresentation from file using automatic ReaderInterface resolution.
+     *
+     * A reader that says it can read the file and then cannot does not end the search: the next one
+     * is asked, and only when none of them has produced a presentation is the failure raised.
+     * `PowerPoint97::canRead()` answers for any OLE container, which is a good deal more than the
+     * files it can parse, so a `.ppt` it chokes on used to stop the resolution where it stood.
+     *
+     * The first failure is carried as the previous exception, because it says a great deal more
+     * about the file than the fact that the resolution came to nothing.
      */
     public static function load(string $pFilename): PhpPresentation
     {
+        $firstFailure = null;
+
         // Try loading using self::$autoResolveClasses
         foreach (self::$autoResolveClasses as $autoResolveClass) {
             $reader = self::createReader($autoResolveClass);
-            if ($reader->canRead($pFilename)) {
+            if (!$reader->canRead($pFilename)) {
+                continue;
+            }
+
+            try {
                 return $reader->load($pFilename);
+            } catch (Throwable $exception) {
+                $firstFailure = $firstFailure ?? $exception;
             }
         }
 
         throw new InvalidFileFormatException(
             $pFilename,
             self::class,
-            'Could not automatically determine the good ' . ReaderInterface::class
+            'Could not automatically determine the good ' . ReaderInterface::class,
+            $firstFailure
         );
     }
 

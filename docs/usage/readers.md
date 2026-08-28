@@ -84,3 +84,19 @@ The name of the reader is `Serialized`.
 $reader = IOFactory::createReader('Serialized');
 $reader->load(__DIR__ . '/sample.phppt');
 ```
+
+## Automatic resolution
+`IOFactory::load()` asks each reader in turn whether it can read the file, and hands the file to
+the first one that says yes.
+
+``` php
+<?php
+
+use PhpOffice\PhpPresentation\IOFactory;
+
+$presentation = IOFactory::load(__DIR__ . '/sample.pptx');
+```
+
+A reader that says yes and then fails does not end the search: the next one is asked. Only when
+none of them has produced a presentation is an `InvalidFileFormatException` raised, carrying the
+first failure as its previous exception.

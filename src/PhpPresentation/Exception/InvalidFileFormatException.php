@@ -20,9 +20,11 @@ declare(strict_types=1);
 
 namespace PhpOffice\PhpPresentation\Exception;
 
+use Throwable;
+
 class InvalidFileFormatException extends PhpPresentationException
 {
-    public function __construct(string $path, string $class, string $error = '')
+    public function __construct(string $path, string $class, string $error = '', ?Throwable $previous = null)
     {
         if ($class) {
             $class = 'class ' . $class;
@@ -37,6 +39,6 @@ class InvalidFileFormatException extends PhpPresentationException
             $class,
             !empty($error) ? ' ' : '',
             $error
-        ));
+        ), 0, $previous);
     }
 }

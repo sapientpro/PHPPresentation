@@ -78,3 +78,17 @@ $writer = IOFactory::createWriter($oPhpPresentation, 'Serialized');
 $writer->setZipAdapter(new PclZipAdapter());
 $writer->save(__DIR__ . '/sample.phppt');
 ```
+
+## A writer of your own
+`IOFactory` names a writer shipped here by its short name, and one of your own by its fully
+qualified class name. Anything implementing `WriterInterface` will do; extend `AbstractWriter` as
+well to be handed the drawing hash table and the presentation's parts.
+
+``` php
+<?php
+
+use PhpOffice\PhpPresentation\IOFactory;
+
+$writer = IOFactory::createWriter($oPhpPresentation, \Acme\Presentation\Writer\Keynote::class);
+$writer->save(__DIR__ . '/sample.key');
+```

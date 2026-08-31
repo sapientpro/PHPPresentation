@@ -18,27 +18,27 @@
 
 declare(strict_types=1);
 
-namespace PhpOffice\PhpPresentation\Exception;
+namespace PhpOffice\PhpPresentation\Tests\Reader;
 
-use Throwable;
+use PhpOffice\PhpPresentation\PhpPresentation;
+use PhpOffice\PhpPresentation\Reader\ReaderInterface;
+use RuntimeException;
 
-class InvalidFileFormatException extends PhpPresentationException
+/**
+ * A reader that says it can read anything and then cannot, which is what `PowerPoint97` does to
+ * every OLE container it is handed and cannot parse.
+ */
+class ClaimingReader implements ReaderInterface
 {
-    public function __construct(string $path, string $class, string $error = '', ?Throwable $previous = null)
-    {
-        if ($class) {
-            $class = 'class ' . $class;
-        }
-        if ($error) {
-            $error = '(' . $error . ')';
-        }
+    public const FAILURE = 'ClaimingReader claimed a file it cannot read';
 
-        parent::__construct(sprintf(
-            'The file %s is not in the format supported by %s%s%s',
-            $path,
-            $class,
-            !empty($error) ? ' ' : '',
-            $error
-        ), 0, $previous);
+    public function canRead(string $pFilename): bool
+    {
+        return true;
+    }
+
+    public function load(string $pFilename, int $flags = 0): PhpPresentation
+    {
+        throw new RuntimeException(self::FAILURE);
     }
 }

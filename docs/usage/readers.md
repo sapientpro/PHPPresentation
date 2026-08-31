@@ -84,3 +84,35 @@ The name of the reader is `Serialized`.
 $reader = IOFactory::createReader('Serialized');
 $reader->load(__DIR__ . '/sample.phppt');
 ```
+
+## A reader of your own
+`IOFactory` names a reader shipped here by its short name, and one of your own by its fully
+qualified class name. Anything implementing `ReaderInterface` will do.
+
+``` php
+<?php
+
+use PhpOffice\PhpPresentation\IOFactory;
+
+$reader = IOFactory::createReader(\Acme\Presentation\Reader\Keynote::class);
+$reader->load(__DIR__ . '/sample.key');
+```
+
+`IOFactory::load()` asks each reader in turn whether it can read the file. Pass the readers to ask,
+in the order to ask them; `getDefaultReaders()` gives the ones shipped here, so that yours can be
+added to them rather than replace them.
+
+``` php
+<?php
+
+use PhpOffice\PhpPresentation\IOFactory;
+
+$presentation = IOFactory::load(__DIR__ . '/sample.key', array_merge(
+    [\Acme\Presentation\Reader\Keynote::class],
+    IOFactory::getDefaultReaders()
+));
+```
+
+A reader that says it can read the file and then fails does not end the search: the next one is
+asked. Only when none of them has produced a presentation is the failure raised, carrying the first
+one as its previous exception.
